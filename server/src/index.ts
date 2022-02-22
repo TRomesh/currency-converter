@@ -1,8 +1,10 @@
 import "dotenv/config";
 import cron from "node-cron";
 import bcrypt from "bcrypt";
+import { schema } from "./schema";
 import { getUser } from "./util/context";
 import { cache } from "./util/cache";
+import { refreshCache } from "./util/job";
 import { getAllCountries } from "./services";
 import { ApolloServer } from "apollo-server";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
@@ -22,7 +24,6 @@ const init = async () => {
     );
 };
 
-import { schema } from "./schema";
 export const server = new ApolloServer({
     schema,
     context: async ({ req }) => {
@@ -35,11 +36,12 @@ export const server = new ApolloServer({
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
 });
 
-cron.schedule("0 */5 * * * *", async () => {
-    console.log("running every minute 5");
+// Refetch currency data every 2mins
+cron.schedule("0 */2 * * * *", async () => {
+    refreshCache();
 });
 
-const port = 3000 || process.env.PORT;
+const port = process.env.PORT || 3000;
 
 server.listen({ port }).then(async ({ url }) => {
     init();

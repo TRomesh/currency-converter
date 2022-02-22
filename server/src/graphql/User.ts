@@ -37,7 +37,7 @@ export const LoginMutation = extendType({
 
                 const errorMessage = await rateLimiter(
                     { parent: {}, args, context, info },
-                    { max: 5, window: "15s" },
+                    { max: 30, window: "60s" },
                 );
                 if (errorMessage) throw new Error(errorMessage);
 

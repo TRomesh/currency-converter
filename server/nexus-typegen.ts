@@ -16,8 +16,7 @@ declare global {
 export interface NexusGenInputs {
   ConvertInputType: { // input type
     amount: number; // Float!
-    cca2: string; // String!
-    code: string; // String!
+    codes?: string[] | null; // [String!]
   }
   DetailInputType: { // input type
     codes?: string[] | null; // [String!]
@@ -42,9 +41,7 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   Conversion: { // root type
-    amount?: number | null; // Float
-    cca2?: string | null; // String
-    code?: string | null; // String
+    conversion?: NexusGenScalars['JSON'] | null; // JSON
   }
   Country: { // root type
     cca2?: string | null; // String
@@ -80,9 +77,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
   Conversion: { // field return type
-    amount: number | null; // Float
-    cca2: string | null; // String
-    code: string | null; // String
+    conversion: NexusGenScalars['JSON'] | null; // JSON
   }
   Country: { // field return type
     cca2: string | null; // String
@@ -106,20 +101,18 @@ export interface NexusGenFieldTypes {
     token: string | null; // String
   }
   Mutation: { // field return type
+    convert: NexusGenRootTypes['Conversion']; // Conversion!
+    country_details: Array<NexusGenRootTypes['Country'] | null>; // [Country]!
     login: NexusGenRootTypes['LoginPayload']; // LoginPayload!
   }
   Query: { // field return type
-    convert: NexusGenRootTypes['Conversion']; // Conversion!
-    country_details: Array<NexusGenRootTypes['Country'] | null>; // [Country]!
     country_list: Array<NexusGenRootTypes['CountryList'] | null>; // [CountryList]!
   }
 }
 
 export interface NexusGenFieldTypeNames {
   Conversion: { // field return type name
-    amount: 'Float'
-    cca2: 'String'
-    code: 'String'
+    conversion: 'JSON'
   }
   Country: { // field return type name
     cca2: 'String'
@@ -143,27 +136,25 @@ export interface NexusGenFieldTypeNames {
     token: 'String'
   }
   Mutation: { // field return type name
+    convert: 'Conversion'
+    country_details: 'Country'
     login: 'LoginPayload'
   }
   Query: { // field return type name
-    convert: 'Conversion'
-    country_details: 'Country'
     country_list: 'CountryList'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
-    login: { // args
-      data?: NexusGenInputs['LoginInputType'] | null; // LoginInputType
-    }
-  }
-  Query: {
     convert: { // args
       data?: NexusGenInputs['ConvertInputType'] | null; // ConvertInputType
     }
     country_details: { // args
       data?: NexusGenInputs['DetailInputType'] | null; // DetailInputType
+    }
+    login: { // args
+      data?: NexusGenInputs['LoginInputType'] | null; // LoginInputType
     }
   }
 }

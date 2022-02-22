@@ -9,6 +9,8 @@ import {
 import {
     addCurrunciesToCountries,
     getCurrunciesFromCountries,
+    getCurrencyDifference,
+    getConvertedAmounts,
 } from "../util/common";
 import { getGraphQLRateLimiter } from "graphql-rate-limit";
 import { country_type, currency_type } from "../service.types";
@@ -21,6 +23,14 @@ const CountryName = objectType({
     definition(t) {
         t.string("common");
         t.string("official");
+    },
+});
+
+const ConversionField = objectType({
+    name: "ConversionField",
+    definition(t) {
+        t.string("currency");
+        t.float("rate");
     },
 });
 
@@ -41,9 +51,8 @@ export const DetailInputType = inputObjectType({
 export const ConvertInputType = inputObjectType({
     name: "ConvertInputType",
     definition(t) {
-        t.nonNull.string("code");
+        t.list.nonNull.string("codes");
         t.nonNull.float("amount");
-        t.nonNull.string("cca2");
     },
 });
 
@@ -76,9 +85,9 @@ export const CountryList = objectType({
 export const Conversion = objectType({
     name: "Conversion",
     definition(t) {
-        t.float("amount");
-        t.string("cca2");
-        t.string("code");
+        t.field("conversion", {
+            type: Currency_Scalar,
+        });
     },
 });
 
@@ -101,6 +110,12 @@ export const CountryQuery = extendType({
                 }
             },
         });
+    },
+});
+
+export const CountryMutation = extendType({
+    type: "Mutation",
+    definition(t) {
         t.nonNull.list.field("country_details", {
             type: "Country",
             args: { data: DetailInputType },
@@ -132,7 +147,12 @@ export const CountryQuery = extendType({
                         let country_currencies =
                             getCurrunciesFromCountries(countries);
 
-                        if (cached_currencies) {
+                        let currency_diff = getCurrencyDifference(
+                            country_currencies,
+                            cached_currencies,
+                        );
+
+                        if (cached_currencies && currency_diff?.length === 0) {
                             currencies = cached_currencies;
                         } else {
                             let {
@@ -153,42 +173,64 @@ export const CountryQuery = extendType({
                 }
             },
         });
+
         t.nonNull.field("convert", {
             type: "Conversion",
             args: { data: ConvertInputType },
             resolve: async (_, args, context) => {
                 if (context.user) {
-                    let cached_currencies = cache.get(
-                        "currencies",
-                    ) as currency_type;
+                    if (args.data?.codes) {
+                        let cached_countries = cache.get(
+                            "countries",
+                        ) as country_type[];
 
-                    let currencies: currency_type = {};
+                        let cached_currencies = cache.get(
+                            "currencies",
+                        ) as currency_type;
 
-                    if (cached_currencies) {
-                        currencies = cached_currencies;
-                    } else {
-                        let {
-                            data: { rates },
-                        }: AxiosResponse = await getExchangeRates([
-                            args.data?.code as string,
-                            "SEK",
-                        ]);
-                        currencies = rates;
-                    }
-                    let base = "SEK" as keyof typeof currencies;
-                    let code = args.data?.code as keyof typeof currencies;
+                        let countries: country_type[] = [];
+                        let currencies: currency_type = {};
 
-                    if (
-                        args.data?.cca2 &&
-                        args.data?.code &&
-                        args.data?.amount
-                    ) {
+                        if (cached_countries) {
+                            countries = cached_countries.filter((country) =>
+                                args.data?.codes?.includes(country.cca2),
+                            );
+                        } else {
+                            let { data }: AxiosResponse =
+                                await getCountryDetails(args.data?.codes);
+
+                            countries = data;
+                        }
+
+                        let country_currencies =
+                            getCurrunciesFromCountries(countries);
+
+                        let currency_diff = getCurrencyDifference(
+                            country_currencies,
+                            cached_currencies,
+                        );
+
+                        if (cached_currencies && currency_diff?.length === 0) {
+                            currencies = cached_currencies;
+                        } else {
+                            let {
+                                data: { rates },
+                            }: AxiosResponse = await getExchangeRates([
+                                ...country_currencies,
+                                "SEK",
+                            ]);
+                            cache.set("currencies", rates, 300);
+                            currencies = rates;
+                        }
+
+                        let result = getConvertedAmounts(
+                            countries,
+                            currencies,
+                            args.data?.amount,
+                        );
+
                         return {
-                            amount:
-                                (currencies[base] / currencies[code]) *
-                                args.data?.amount,
-                            code: args.data?.code,
-                            cca2: args.data?.cca2,
+                            conversion: { result },
                         };
                     } else {
                         throw new Error("Invalid Parameters");
