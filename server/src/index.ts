@@ -34,6 +34,7 @@ export const server = new ApolloServer({
         }
     },
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+    introspection: true,
 });
 
 // Refetch currency data every 2mins

@@ -5,8 +5,9 @@
     "main": "dist/src/index.js",
     "scripts": {
         "test": "jest",
+        "tsc": "./node_modules/typescript/bin/tsc",
         "build": "tsc --build",
-        "start": "npm run build && node dist/src/index.js",
+        "start": "node dist/src/index.js",
         "dev": "ts-node-dev --transpile-only --no-notify --exit-child src/index.ts",
         "generate": "ts-node --transpile-only src/schema.ts",
         "prettier-format": "prettier src --write"

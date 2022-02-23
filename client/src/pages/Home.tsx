@@ -13,12 +13,7 @@ import Conversion from "../components/card/Conversion";
 import Select from "../components/form/Select";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import {
-  LIST_COUNTRIES,
-  COUNTRY_DETAILS,
-  CONVERT,
-  CLEAR_DATA,
-} from "../Queries";
+import { LIST_COUNTRIES, COUNTRY_DETAILS, CONVERT } from "../Queries";
 import { useQuery, useMutation } from "@apollo/client";
 import debounce from "lodash.debounce";
 import { useToasts } from "react-toast-notifications";
@@ -49,12 +44,6 @@ const Home = (): JSX.Element => {
   });
 
   const [convert, convertStatus] = useMutation(CONVERT);
-
-  const [clearData, { client }] = useMutation(CLEAR_DATA, {
-    update(cache, result) {
-      //Todo Clear cache
-    },
-  });
 
   const debouncedAmountConvert = useRef(
     debounce(async ({ amount, codes }) => {
@@ -88,18 +77,14 @@ const Home = (): JSX.Element => {
     return countries && countries.length > 0
       ? countries.map((country: any) => {
           return (
-            <Fragment key={`${country.cca2}-${country.official}`}>
-              <Grid item xs={1}></Grid>
-              <Grid item xs={10}>
-                <Card
-                  rates={country.rates}
-                  common={country.official}
-                  population={country.population}
-                  currencies={country.currencies}
-                />
-              </Grid>
-              <Grid item xs={1}></Grid>
-            </Fragment>
+            <td key={`${country.cca2}-${country.official}`}>
+              <Card
+                rates={country.rates}
+                common={country.official}
+                population={country.population}
+                currencies={country.currencies}
+              />
+            </td>
           );
         })
       : null;
@@ -109,13 +94,9 @@ const Home = (): JSX.Element => {
     return rates && rates.length > 0
       ? rates.map((rate, i) => {
           return (
-            <Fragment key={i}>
-              <Grid item xs={1}></Grid>
-              <Grid item xs={10}>
-                <Conversion rate={rate} />
-              </Grid>
-              <Grid item xs={1}></Grid>
-            </Fragment>
+            <td key={i}>
+              <Conversion rate={rate} />
+            </td>
           );
         })
       : null;
@@ -146,7 +127,8 @@ const Home = (): JSX.Element => {
       selectEnabled: true,
       amount: 0,
     });
-    clearData();
+    detailsStatus.reset();
+    convertStatus.reset();
   };
 
   if (loading)
@@ -217,17 +199,21 @@ const Home = (): JSX.Element => {
           <Grid item xs={2}></Grid>
           <Grid item xs={12}></Grid>
           <Grid item xs={1}></Grid>
-          <Grid item xs={6}>
-            <Grid container spacing={3}>
-              {renderCountryDetailsList(detailsStatus?.data?.country_details)}
-            </Grid>
-          </Grid>
-          <Grid item xs={4}>
-            <Grid container spacing={3}>
-              {renderConversionList(
-                convertStatus?.data?.convert?.conversion?.result
-              )}
-            </Grid>
+          <Grid item xs={10}>
+            <table>
+              <tbody>
+                <tr>
+                  {renderCountryDetailsList(
+                    detailsStatus?.data?.country_details
+                  )}
+                </tr>
+                <tr>
+                  {renderConversionList(
+                    convertStatus?.data?.convert?.conversion?.result
+                  )}
+                </tr>
+              </tbody>
+            </table>
           </Grid>
           <Grid item xs={1}></Grid>
         </Fragment>

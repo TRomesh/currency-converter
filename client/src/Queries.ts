@@ -36,9 +36,3 @@ export const CONVERT = gql`
     }
   }
 `;
-
-export const CLEAR_DATA = gql`
-  mutation CLEAR_DATA($status: Boolean) {
-    clear_data(data: { status: $status }) @client
-  }
-`;

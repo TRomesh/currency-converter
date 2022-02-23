@@ -6,21 +6,33 @@ import { ConversionProps } from "./Conversion.types";
 const Conversion = ({ rate }: ConversionProps): JSX.Element => {
   return (
     <Paper>
-      {rate &&
-        rate.map((r: any) => {
-          const value = Object.entries(r);
-          return (
-            <Grid container spacing={2} key={`${value[0]}-${value[1]}`}>
-              <Grid item xs={3}></Grid>
-              <Grid item xs={6}>
-                <InputLabel style={{ height: `50px` }}>
-                  SEK value in {`${value[0]} : ${value[1]}`}
-                </InputLabel>
-              </Grid>
-              <Grid item xs={3}></Grid>
-            </Grid>
-          );
-        })}
+      <Grid container spacing={2}>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}>
+          {rate &&
+            rate.map((r: any) => {
+              const value = Object.entries(r)[0] as [string, number];
+              return (
+                <Grid container spacing={2} key={`${value[0]}-${value[1]}`}>
+                  <Grid item xs={2}></Grid>
+                  <Grid item xs={8}>
+                    <InputLabel style={{ height: `50px` }}>
+                      SEK value in {`${value[0]} : ${value[1].toFixed(5)}`}
+                    </InputLabel>
+                  </Grid>
+                  <Grid item xs={2}></Grid>
+                </Grid>
+              );
+            })}
+        </Grid>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}></Grid>
+        <Grid item xs={12}></Grid>
+      </Grid>
     </Paper>
   );
 };
