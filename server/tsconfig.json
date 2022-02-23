@@ -9,6 +9,10 @@
       "rootDir": ".",
       "outDir": "dist",
       "sourceMap": true,
-      "esModuleInterop": true
-    }
-  }
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+    },
+    "exclude": [
+      "src/test/"
+   ]
+}

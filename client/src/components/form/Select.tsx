@@ -2,9 +2,16 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { selectProps } from "./Select.types";
 
-const Select = ({ data = [], onChange }: selectProps): JSX.Element => {
+const Select = ({
+  data = [],
+  onChange,
+  disabled = false,
+  value = [],
+}: selectProps): JSX.Element => {
   return (
     <Autocomplete
+      value={value}
+      disabled={disabled}
       multiple
       id="tags-outlined"
       options={data}

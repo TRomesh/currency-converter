@@ -13,25 +13,48 @@ import Conversion from "../components/card/Conversion";
 import Select from "../components/form/Select";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import { LIST_COUNTRIES, COUNTRY_DETAILS, CONVERT } from "../Queries";
+import {
+  LIST_COUNTRIES,
+  COUNTRY_DETAILS,
+  CONVERT,
+  CLEAR_DATA,
+} from "../Queries";
 import { useQuery, useMutation } from "@apollo/client";
 import debounce from "lodash.debounce";
+import { useToasts } from "react-toast-notifications";
 
 interface initSelectedState {
   amount: number;
   selectedCountries: any[];
+  selectEnabled: boolean;
 }
 
 const Home = (): JSX.Element => {
+  const { addToast } = useToasts();
   const [selected, setSelected] = useState<initSelectedState>({
     amount: 0,
+    selectEnabled: true,
     selectedCountries: [],
   });
-  const { loading, error, data } = useQuery(LIST_COUNTRIES);
+  const { loading, error, data } = useQuery(LIST_COUNTRIES, {
+    onError: (error) => {
+      addToast(error.message, { appearance: "error", autoDismiss: true });
+    },
+  });
 
-  const [details, detailsStatus] = useMutation(COUNTRY_DETAILS);
+  const [details, detailsStatus] = useMutation(COUNTRY_DETAILS, {
+    onCompleted: () => {
+      setSelected({ ...selected, selectEnabled: false });
+    },
+  });
 
   const [convert, convertStatus] = useMutation(CONVERT);
+
+  const [clearData, { client }] = useMutation(CLEAR_DATA, {
+    update(cache, result) {
+      //Todo Clear cache
+    },
+  });
 
   const debouncedAmountConvert = useRef(
     debounce(async ({ amount, codes }) => {
@@ -57,6 +80,7 @@ const Home = (): JSX.Element => {
     let codes: string[] = selected.selectedCountries.map(
       (country) => country.cca2
     );
+
     details({ variables: { codes } });
   };
 
@@ -97,24 +121,43 @@ const Home = (): JSX.Element => {
       : null;
   };
 
+  const getCountryCodes = () => {
+    return (
+      detailsStatus &&
+      detailsStatus?.data?.country_details.map((country: any) => country.cca2)
+    );
+  };
+
   const onChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
-    setSelected({ ...selected, amount: parseFloat(event.target.value) });
-    let codes =
-      detailsStatus &&
-      detailsStatus?.data?.country_details.map((country: any) => country.cca2);
+    setSelected({
+      ...selected,
+      amount: parseFloat(event.target.value),
+    });
+    let codes = getCountryCodes();
     debouncedAmountConvert({ amount: event.target.value, codes });
+  };
+
+  const Cancel = () => {
+    setSelected({
+      ...selected,
+      selectedCountries: [],
+      selectEnabled: true,
+      amount: 0,
+    });
+    clearData();
   };
 
   if (loading)
     return (
       <Grid container spacing={2}>
-        <Grid item xs={4}></Grid>
-        <Grid item xs={4}>
+        <Grid item xs={5}></Grid>
+        <Grid item xs={2}>
           <CircularProgress />
+          <span>Loading....</span>
         </Grid>
-        <Grid item xs={4}></Grid>
+        <Grid item xs={5}></Grid>
       </Grid>
     );
 
@@ -122,45 +165,73 @@ const Home = (): JSX.Element => {
     <Grid container spacing={2}>
       <Grid item xs={2}></Grid>
       <Grid item xs={8}>
-        <Select data={data && data.country_list} onChange={onSelectChange} />
+        <Select
+          value={selected.selectedCountries}
+          data={data && data.country_list}
+          onChange={onSelectChange}
+          disabled={!selected?.selectEnabled}
+        />
       </Grid>
       <Grid item xs={2}></Grid>
-      <Grid item xs={2}></Grid>
-      <Grid item xs={8}>
+      <Grid item xs={9}></Grid>
+      <Grid item xs={1}>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            Cancel();
+          }}
+        >
+          Clear
+        </Button>
+      </Grid>
+      <Grid item xs={1}>
         <Button variant="outlined" onClick={getCounryDetails}>
           Details
         </Button>
       </Grid>
-      <Grid item xs={2}></Grid>
-      <Grid item xs={12}></Grid>
-      <Grid item xs={2}></Grid>
-      <Grid item xs={8}>
-        {detailsStatus?.data?.country_details.length > 0 ? (
-          <TextField
-            fullWidth
-            id="outlined-basic"
-            label="Convert from SEK"
-            variant="outlined"
-            onChange={onChange}
-          />
-        ) : null}
-      </Grid>
-      <Grid item xs={2}></Grid>
-      <Grid item xs={12}></Grid>
       <Grid item xs={1}></Grid>
-      <Grid item xs={6}>
-        <Grid container spacing={3}>
-          {renderCountryDetailsList(detailsStatus?.data?.country_details)}
-        </Grid>
-      </Grid>
-      <Grid item xs={4}>
-        <Grid container spacing={3}>
-          {renderConversionList(
-            convertStatus?.data?.convert?.conversion?.result
-          )}
-        </Grid>
-      </Grid>
-      <Grid item xs={1}></Grid>
+      <Grid item xs={12}></Grid>
+      {detailsStatus?.loading ? (
+        <Fragment>
+          <Grid item xs={4}></Grid>
+          <Grid item xs={4}>
+            <CircularProgress size={1} />
+          </Grid>
+          <Grid item xs={4}></Grid>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <Grid item xs={2}></Grid>
+          <Grid item xs={8}>
+            {detailsStatus?.data?.country_details.length > 0 ? (
+              <TextField
+                fullWidth
+                value={selected.amount}
+                id="outlined-basic"
+                label="Convert from SEK"
+                variant="outlined"
+                onChange={onChange}
+              />
+            ) : null}
+          </Grid>
+          <Grid item xs={2}></Grid>
+          <Grid item xs={12}></Grid>
+          <Grid item xs={1}></Grid>
+          <Grid item xs={6}>
+            <Grid container spacing={3}>
+              {renderCountryDetailsList(detailsStatus?.data?.country_details)}
+            </Grid>
+          </Grid>
+          <Grid item xs={4}>
+            <Grid container spacing={3}>
+              {renderConversionList(
+                convertStatus?.data?.convert?.conversion?.result
+              )}
+            </Grid>
+          </Grid>
+          <Grid item xs={1}></Grid>
+        </Fragment>
+      )}
     </Grid>
   );
 };

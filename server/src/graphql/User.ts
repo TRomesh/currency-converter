@@ -53,7 +53,9 @@ export const LoginMutation = extendType({
                         token: jwt.sign({ userName, userPassword }, JWT_SECRET),
                     };
                 } else {
-                    throw new Error("Unable to Login");
+                    throw new Error(
+                        "Unable to Login, Please check username and password combination",
+                    );
                 }
             },
         });

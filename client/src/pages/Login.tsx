@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
@@ -6,14 +6,32 @@ import TextField from "@mui/material/TextField";
 import { USER_LOGIN } from "../Queries";
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
+import { useToasts } from "react-toast-notifications";
+
+type credentials = {
+  username: string;
+  password: string;
+};
+
+const InitState: credentials = {
+  username: "",
+  password: "",
+};
 
 const Login = (): JSX.Element => {
   let navigate = useNavigate();
-  const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
+  const { addToast } = useToasts();
+  const [credentials, setCredentials] = useState<credentials>(InitState);
+
+  const [login, { data, loading, error }] = useMutation(USER_LOGIN, {
+    onCompleted: ({ login }) => {
+      localStorage.setItem("token", login.token);
+      navigate("/home");
+    },
+    onError: (error) => {
+      addToast(error.message, { appearance: "error", autoDismiss: true });
+    },
   });
-  const [login, { data, loading, error }] = useMutation(USER_LOGIN);
 
   const handleOnChange = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
@@ -22,12 +40,9 @@ const Login = (): JSX.Element => {
     setCredentials((creds) => ({ ...creds, [type]: e.target.value }));
   };
 
-  useEffect(() => {
-    if (data) {
-      localStorage.setItem("token", data.login.token);
-      navigate("/home");
-    }
-  }, [loading]);
+  const Cancel = () => {
+    setCredentials(InitState);
+  };
 
   return (
     <Grid container spacing={2}>
@@ -62,7 +77,17 @@ const Login = (): JSX.Element => {
             </Grid>
             <Grid item xs={3}></Grid>
             <Grid item xs={8}></Grid>
-            <Grid item xs={4}>
+            <Grid item xs={1}>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  Cancel();
+                }}
+              >
+                Cancel
+              </Button>
+            </Grid>
+            <Grid item xs={1}>
               <Button
                 variant="outlined"
                 onClick={() => {
@@ -77,6 +102,7 @@ const Login = (): JSX.Element => {
                 Login
               </Button>
             </Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={12} />
           </Grid>
         </Paper>

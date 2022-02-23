@@ -3,6 +3,7 @@ import { GraphQLSchema } from "graphql";
 import { join } from "path";
 import * as types from "./graphql";
 
+// cache memory
 export const schema = makeSchema({
     types, // 1
     outputs: {
