@@ -44,6 +44,10 @@ const Login = (): JSX.Element => {
     setCredentials(InitState);
   };
 
+  const isEnabled = ({ username, password }: credentials): boolean => {
+    return !(username?.length > 0 && password?.length > 0);
+  };
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={2}></Grid>
@@ -76,8 +80,8 @@ const Login = (): JSX.Element => {
               />
             </Grid>
             <Grid item xs={3}></Grid>
-            <Grid item xs={8}></Grid>
-            <Grid item xs={1}>
+            <Grid item xs={6} lg={6}></Grid>
+            <Grid item xs={2} lg={2}>
               <Button
                 variant="outlined"
                 onClick={() => {
@@ -87,9 +91,10 @@ const Login = (): JSX.Element => {
                 Cancel
               </Button>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item xs={2} lg={2}>
               <Button
                 variant="outlined"
+                disabled={isEnabled(credentials)}
                 onClick={() => {
                   login({
                     variables: {
@@ -102,7 +107,7 @@ const Login = (): JSX.Element => {
                 Login
               </Button>
             </Grid>
-            <Grid item xs={2}></Grid>
+            <Grid item xs={2} lg={2}></Grid>
             <Grid item xs={12} />
           </Grid>
         </Paper>

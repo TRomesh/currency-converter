@@ -102,3 +102,10 @@ $ npm run test
 - `lodash.debounce` for adding debounce for events
 - `graphql-rate-limit` for limiting number of request per minute
 - `@mui/material` for building components
+
+---
+
+### Test User Credentials
+
+- username: "adam"
+- password: "12345"

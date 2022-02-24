@@ -131,12 +131,20 @@ const Home = (): JSX.Element => {
     convertStatus.reset();
   };
 
+  const isDetailsEnabled = (selectedCountries: string[]): boolean => {
+    return !(selectedCountries?.length > 0);
+  };
+
   if (loading)
     return (
       <Grid container spacing={2}>
         <Grid item xs={5}></Grid>
         <Grid item xs={2}>
           <CircularProgress />
+        </Grid>
+        <Grid item xs={5}></Grid>
+        <Grid item xs={5}></Grid>
+        <Grid item xs={2}>
           <span>Loading....</span>
         </Grid>
         <Grid item xs={5}></Grid>
@@ -155,7 +163,7 @@ const Home = (): JSX.Element => {
         />
       </Grid>
       <Grid item xs={2}></Grid>
-      <Grid item xs={9}></Grid>
+      <Grid item xs={8}></Grid>
       <Grid item xs={1}>
         <Button
           variant="outlined"
@@ -167,11 +175,15 @@ const Home = (): JSX.Element => {
         </Button>
       </Grid>
       <Grid item xs={1}>
-        <Button variant="outlined" onClick={getCounryDetails}>
+        <Button
+          variant="outlined"
+          onClick={getCounryDetails}
+          disabled={isDetailsEnabled(selected.selectedCountries)}
+        >
           Details
         </Button>
       </Grid>
-      <Grid item xs={1}></Grid>
+      <Grid item xs={2}></Grid>
       <Grid item xs={12}></Grid>
       {detailsStatus?.loading ? (
         <Fragment>
@@ -190,9 +202,13 @@ const Home = (): JSX.Element => {
                 fullWidth
                 value={selected.amount}
                 id="outlined-basic"
+                type="number"
                 label="Convert from SEK"
                 variant="outlined"
                 onChange={onChange}
+                InputProps={{
+                  inputProps: { min: 0 },
+                }}
               />
             ) : null}
           </Grid>

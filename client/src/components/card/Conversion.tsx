@@ -8,9 +8,11 @@ const Conversion = ({ rate }: ConversionProps): JSX.Element => {
     <Paper>
       <Grid container spacing={2}>
         <Grid item xs={12}></Grid>
-        <Grid item xs={12}></Grid>
-        <Grid item xs={12}></Grid>
-        <Grid item xs={12}></Grid>
+        <Grid item xs={3}></Grid>
+        <Grid item xs={6}>
+          <InputLabel>SEK value in</InputLabel>
+        </Grid>
+        <Grid item xs={3}></Grid>
         <Grid item xs={12}>
           {rate &&
             rate.map((r: any) => {
@@ -20,7 +22,7 @@ const Conversion = ({ rate }: ConversionProps): JSX.Element => {
                   <Grid item xs={2}></Grid>
                   <Grid item xs={8}>
                     <InputLabel style={{ height: `50px` }}>
-                      SEK value in {`${value[0]} : ${value[1].toFixed(5)}`}
+                      {`${value[0]} : ${value[1].toFixed(5)}`}
                     </InputLabel>
                   </Grid>
                   <Grid item xs={2}></Grid>
