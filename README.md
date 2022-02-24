@@ -11,6 +11,8 @@ API_KEY=
 JWT_SECRET=
 ```
 
+---
+
 ## Installing dependencies
 
 - Run the following commands in both Server and Client
@@ -24,6 +26,8 @@ $ npm install
 
 ```
 
+---
+
 ## Starting the project
 
 - Run the following commands in both Server and Client
@@ -36,6 +40,8 @@ $ yarn start (or npm start)
 $ npm start
 
 ```
+
+---
 
 ## Development
 
@@ -52,6 +58,8 @@ $ npm run dev
 
 ```
 
+---
+
 ## Tests
 
 - Run the following commands in both Server to run unit tests
@@ -60,3 +68,37 @@ $ npm run dev
 # Inside Server
 $ npm run test
 ```
+
+---
+
+## Project Design Decissions
+
+### Sever
+
+- Use caching to keep the Countries and Selected Currencies
+- Using a corn job to fetch currencies every 2 minutes
+- Saving a user in memory for user authentication with JWT
+
+#### Special Libraries used for Sever Implementation
+
+- `axios` for data fetching
+- `node-cache` for caching data
+- `graphql-rate-limit` for limiting number of request per minute
+- `node-cron` to run corn jobs to fetch currencies
+- `nexus` to define queries and mutations
+- `graphql-type-json` to convert to JSON data structure
+
+---
+
+### Client
+
+- Higher Orfer Component for Protecting Routes
+- Using Debounce for input events
+- Using apollo-client context to set authorization header
+
+#### Special Libraries used for Client Implementation
+
+- `react-toast-notifications` for error notifications
+- `lodash.debounce` for adding debounce for events
+- `graphql-rate-limit` for limiting number of request per minute
+- `@mui/material` for building components
