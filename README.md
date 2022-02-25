@@ -1,5 +1,9 @@
 # Currency Converter
 
+## Demo
+
+- Live web app : [currency-converter](https://currency-converter-anyfin.netlify.app)
+
 ## Project setup
 
 - Clone the project and add the Environment variabel (.env) file in both Client and Server directories by reffering env.example files
